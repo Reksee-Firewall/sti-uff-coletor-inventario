@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,51 @@ class PdfReportController extends ChangeNotifier {
     if (result.type != ResultType.done) {
       debugPrint('Erro ao abrir o arquivo PDF.');
     }
+  }
+
+  List<InventoryItem> getFilteredByDateRange(
+      List<InventoryItem> items, String selectedDateRange) {
+    List<InventoryItem> filteredItems = List.from(items);
+
+    switch (selectedDateRange) {
+      case "allRecentHistory":
+        filteredItems = items
+            .where((item) => item.date
+                .isAfter(DateTime.now().subtract(const Duration(days: 365))))
+            .toList();
+        break;
+
+      case "last7Days":
+        filteredItems = items.where((item) {
+          final now = DateTime.now();
+          return item.date.isAfter(now.subtract(const Duration(days: 7))) &&
+              item.date.isBefore(now.add(const Duration(days: 1)));
+        }).toList();
+        break;
+
+      case "last15Days":
+        filteredItems = items.where((item) {
+          final now = DateTime.now();
+          return item.date.isAfter(now.subtract(const Duration(days: 15))) &&
+              item.date.isBefore(now.add(const Duration(days: 1)));
+        }).toList();
+        break;
+
+      case "last30Days":
+        filteredItems = items.where((item) {
+          final now = DateTime.now();
+          return item.date.isAfter(now.subtract(const Duration(days: 30))) &&
+              item.date.isBefore(now.add(const Duration(days: 1)));
+        }).toList();
+        break;
+
+      default:
+        debugPrint("Error. Invalid date range selected.");
+        filteredItems = [];
+        break;
+    }
+
+    return filteredItems;
   }
 
   pw.Align getPackageHeader(PackageModel package) {
@@ -144,7 +190,7 @@ class PdfReportController extends ChangeNotifier {
       mergedCellData: [
         'Coordenadas',
         'Observações',
-        item.description ?? 'N/A',
+        item.observations ?? 'N/A',
       ],
       imageTableData: [
         [
@@ -193,12 +239,19 @@ class PdfReportController extends ChangeNotifier {
                               children: List.generate(1, (innerColIndex) {
                                 return pw.Padding(
                                   padding: const pw.EdgeInsets.all(4),
-                                  child: pw.Text(
-                                    mergedCellData[rowIndex == 2
-                                        ? 0
-                                        : rowIndex == 6
-                                            ? 1
-                                            : 2],
+                                  child: pw.Container(
+                                    constraints: const pw.BoxConstraints(
+                                      maxWidth: 200,
+                                    ),
+                                    child: pw.Text(
+                                      mergedCellData[rowIndex == 2
+                                          ? 0
+                                          : rowIndex == 6
+                                              ? 1
+                                              : 2],
+                                      softWrap: true,
+                                      textAlign: pw.TextAlign.justify,
+                                    ),
                                   ),
                                 );
                               }),
@@ -259,6 +312,7 @@ class PdfReportController extends ChangeNotifier {
                             padding: const pw.EdgeInsets.all(4),
                             child: pw.SizedBox(
                               height: 100,
+                              width: 80,
                               child: pw.Center(
                                 child: pw.Image(
                                   pw.MemoryImage(
@@ -292,7 +346,117 @@ class PdfReportController extends ChangeNotifier {
     );
   }
 
-  Future<File> generatePdf(
+  Future<List<PackageModel>> _showPackageSelectionDialog(
+      BuildContext context,
+      List<PackageModel> packages,
+      List<PackageModel> previouslySelectedPackages) async {
+    List<PackageModel> selectedPackages = List.from(previouslySelectedPackages);
+    Completer<List<PackageModel>> completer = Completer();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  'Escolha um pacote',
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: packages.length,
+                        itemBuilder: (context, index) {
+                          final package = packages[index];
+                          return CheckboxListTile(
+                            title: Text(
+                              package.name,
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                            value: selectedPackages.contains(package),
+                            activeColor: Colors.blue,
+                            onChanged: (isSelected) {
+                              setState(() {
+                                if (isSelected == true) {
+                                  selectedPackages.add(package);
+                                } else {
+                                  selectedPackages.remove(package);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        completer.complete(previouslySelectedPackages);
+                      },
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        completer.complete(selectedPackages);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Continuar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return completer.future;
+  }
+
+  Future<File?> generatePdf(
     BuildContext context,
     String selectedOption,
     String selectedDateRange,
@@ -304,8 +468,43 @@ class PdfReportController extends ChangeNotifier {
     List<PackageModel> packages = inventoryProvider.packages;
     List<InventoryItem> items = inventoryProvider.items;
 
+    items = getFilteredByDateRange(items, selectedDateRange);
+
+    /// 0 - All Packages (Geração c/ todos pacotes e seus respectivos itens)
+    /// 1 - Items Only (Todos itens, sem pacotes)
+    /// 2 - Selected Packages Only (Apenas os pacotes selecionados e seus respectivos itens)
+    late int reportGenerationMode;
+    List<PackageModel> selectedPackages = [];
+    switch (selectedOption) {
+      case "allPackages":
+        reportGenerationMode = 0;
+        break;
+      case "allItems":
+        reportGenerationMode = 1;
+        break;
+      case "selectPackages":
+        reportGenerationMode = 2;
+        selectedPackages = await _showPackageSelectionDialog(
+            context, packages, selectedPackages);
+        break;
+      default:
+        debugPrint("Error. Invalid generation mode selected.");
+        break;
+    }
+
+    // Operation is canceled
+    if (reportGenerationMode == 2 && selectedPackages.isEmpty) {
+      return null;
+    } else if (reportGenerationMode == 2) {
+      packages = packages
+          .where((package) => selectedPackages.contains(package))
+          .toList();
+    }
+
     pdf.addPage(pw.MultiPage(
       build: (pw.Context context) {
+        int globalItemCounter = 0;
+
         return [
           pw.Center(
             child: pw.Text(
@@ -319,36 +518,43 @@ class PdfReportController extends ChangeNotifier {
           pw.SizedBox(height: 5),
           pw.Center(
             child: pw.Text(
-              'Gerado Em: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+              'Gerado em: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
               style: const pw.TextStyle(fontSize: 16),
             ),
           ),
           pw.SizedBox(height: 20),
-          ...packages.map((package) {
+          ...packages.mapIndexed((packageIndex, package) {
             final packageItems =
                 items.where((item) => item.packageId == package.id).toList();
 
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                getPackageHeader(package),
+                if (reportGenerationMode == 0 || reportGenerationMode == 2)
+                  getPackageHeader(package),
                 pw.SizedBox(height: 20),
                 ...packageItems.mapIndexed((index, item) {
+                  globalItemCounter++;
+
                   return pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      getItemHeader(item, index + 1),
+                      (reportGenerationMode == 0 || reportGenerationMode == 2)
+                          ? getItemHeader(item, index + 1)
+                          : getItemHeader(item, globalItemCounter),
                       fillAndGetTable(item),
                       pw.SizedBox(height: 20),
                     ],
                   );
                 }),
                 if (packageItems.isEmpty)
-                  pw.Text(
-                    'Nenhum item encontrado neste pacote.',
-                    style: pw.TextStyle(
-                        fontSize: 12, fontStyle: pw.FontStyle.italic),
-                  ),
+                  (reportGenerationMode == 0 || reportGenerationMode == 2)
+                      ? pw.Text(
+                          'Nenhum item encontrado neste pacote.',
+                          style: pw.TextStyle(
+                              fontSize: 12, fontStyle: pw.FontStyle.italic),
+                        )
+                      : pw.SizedBox.shrink(),
                 pw.SizedBox(height: 40),
               ],
             );

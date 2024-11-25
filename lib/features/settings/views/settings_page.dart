@@ -27,6 +27,8 @@ class SettingsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GenerateReportWidget(),
+                SizedBox(height: 30),
+                Divider(),
                 SizedBox(height: 20),
                 PackageWidget(),
                 SizedBox(height: 20),

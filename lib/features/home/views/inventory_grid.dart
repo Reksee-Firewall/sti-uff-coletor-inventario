@@ -411,6 +411,8 @@ class InventoryGridState extends State<InventoryGrid> {
                                             color: Colors.black,
                                           ),
                                           textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
@@ -420,6 +422,8 @@ class InventoryGridState extends State<InventoryGrid> {
                                             color: Colors.black,
                                           ),
                                           textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
                                       ],
                                     ),

@@ -14,7 +14,7 @@ class GenerateReportWidget extends StatefulWidget {
 }
 
 class GenerateReportWidgetState extends State<GenerateReportWidget> {
-  String? selectedOption = 'allItems';
+  String? selectedOption = 'allPackages';
   String? selectedDateRange = 'allRecentHistory';
   final PdfReportController _pdfReportController = PdfReportController();
 
@@ -24,81 +24,86 @@ class GenerateReportWidgetState extends State<GenerateReportWidget> {
     _showOpenPdfDialog(context, file);
   }
 
-  void _showOpenPdfDialog(BuildContext context, File file) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          backgroundColor: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 16),
-                Text(
-                  'Relatório Gerado',
-                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+  void _showOpenPdfDialog(BuildContext context, File? file) {
+    (file != null)
+        ? showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  "Clique em 'Visualizar' para abrir o relatório no leitor de PDF instalado em seu dispositivo.",
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Colors.black54,
+                backgroundColor: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 16),
+                      Text(
+                        'Relatório Gerado',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium!
+                            .copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                       ),
-                  textAlign: TextAlign.center,
+                      const SizedBox(height: 12),
+                      Text(
+                        "Clique em 'Visualizar' para abrir o relatório no leitor de PDF instalado em seu dispositivo.",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Colors.black54,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _openPdf(file);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: const Text(
+                              'Visualizar',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        'Cancelar',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _openPdf(file);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        'Visualizar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+              );
+            },
+          )
+        : null;
   }
 
   Future<void> _openPdf(File file) async {
@@ -158,9 +163,9 @@ class GenerateReportWidgetState extends State<GenerateReportWidget> {
                 ),
                 const SizedBox(height: 16),
                 RadioListTile<String>(
-                  title: const Text('Incluir todos os itens capturados',
+                  title: const Text('Incluir todos os pacotes capturados',
                       style: TextStyle(fontSize: 14)),
-                  value: 'allItems',
+                  value: 'allPackages',
                   groupValue: selectedOption,
                   onChanged: (String? value) {
                     setState(() {
@@ -170,9 +175,9 @@ class GenerateReportWidgetState extends State<GenerateReportWidget> {
                   activeColor: AppColors.primaryColor,
                 ),
                 RadioListTile<String>(
-                  title: const Text('Incluir todos os pacotes capturados',
+                  title: const Text('Incluir todos os itens capturados',
                       style: TextStyle(fontSize: 14)),
-                  value: 'allPackages',
+                  value: 'allItems',
                   groupValue: selectedOption,
                   onChanged: (String? value) {
                     setState(() {

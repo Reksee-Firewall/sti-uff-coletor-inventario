@@ -65,6 +65,7 @@ class InventoryItem {
       images: List<String>.from(map['images'] ?? []),
       geolocation: map['geolocation'],
       observations: map['observations'],
+      // Potential Issue
       date: DateFormat('yyyy-MM-dd HH:mm').parse(
         map['date'] ?? DateTime.now().toString(),
       ),

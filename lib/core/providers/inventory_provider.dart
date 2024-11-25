@@ -92,11 +92,13 @@ class InventoryProvider with ChangeNotifier {
 
       List<InventoryItem> items = [];
 
+      List<String> imageUrls = [];
+
       for (var doc in itemsSnapshot.docs) {
         final item = InventoryItem.fromMap(doc.data());
 
+        imageUrls = [];
         if (item.images != null && item.images!.isNotEmpty) {
-          List<String> imageUrls = [];
           for (var imagePath in item.images!) {
             try {
               imageUrls.add(imagePath);
