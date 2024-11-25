@@ -281,18 +281,6 @@ class _PackageListWidgetState extends State<PackageListWidget> {
         final packages = inventoryProvider.sentPackages;
         final packagesItemsMap = inventoryProvider.packagesItemsMap;
 
-        // final buffer = StringBuffer();
-        // packagesItemsMap.forEach((key, itemList) {
-        //   buffer.writeln('Pacote ID: $key');
-        //   for (var item in itemList) {
-        //     buffer.writeln('  - ${item.toString()}');
-        //     for (var img in item.images!) {
-        //       debugPrint("THIS ${img} BELONGS TO ${item.name}");
-        //     }
-        //   }
-        // });
-        // debugPrint(buffer.toString());
-
         final filteredPackages = packages.where((package) {
           final matchesPackageName =
               package.name.toLowerCase().contains(_searchQuery.toLowerCase());

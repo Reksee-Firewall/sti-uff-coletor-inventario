@@ -159,14 +159,12 @@ class InventoryProvider with ChangeNotifier {
         final packageItems =
             allItems.where((item) => item.packageId == package.id).toList();
 
-        if (package.id == DEFAULT_PACKAGE_ID) {
-          int newId;
-          do {
-            newId = _random.nextInt(90000000) + 10000000;
-          } while (_localPackages.any((p) => p.id == newId));
+        int newId;
+        do {
+          newId = _random.nextInt(90000000) + 10000000;
+        } while (_localPackages.any((p) => p.id == newId));
 
-          package.id = newId;
-        }
+        package.id = newId;
 
         package.createdAt = DateTime.now();
         package.userId = user.uid;
@@ -202,6 +200,7 @@ class InventoryProvider with ChangeNotifier {
             }
             if (!success) break;
             item.images = uploadedUrls;
+            uploadedUrls = [];
           }
 
           await packageRef
