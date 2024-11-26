@@ -158,7 +158,7 @@ class InventoryProvider with ChangeNotifier {
       for (var package in selectedPackages) {
         final packageItems =
             allItems.where((item) => item.packageId == package.id).toList();
-
+        int oldPackageId = package.id;
         int newId;
         do {
           newId = _random.nextInt(90000000) + 10000000;
@@ -212,7 +212,7 @@ class InventoryProvider with ChangeNotifier {
         }
 
         if (success) {
-          await clearItemsForPackage(package.id);
+          await clearItemsForPackage(package.id, oldPackageId);
           await updatePackagesItemsMap();
         } else {
           debugPrint(
@@ -227,11 +227,13 @@ class InventoryProvider with ChangeNotifier {
     return 500;
   }
 
-  Future<void> clearItemsForPackage(int packageId) async {
+  Future<void> clearItemsForPackage(int packageId, int oldPackageId) async {
     final localStorageService = DatabaseHelper();
 
     try {
-      await localStorageService.removeItemsByPackageId(packageId).then((value) {
+      await localStorageService
+          .removeItemsByPackageId(oldPackageId)
+          .then((value) {
         _localItems.removeWhere((item) => item.packageId == packageId);
         notifyListeners();
       });

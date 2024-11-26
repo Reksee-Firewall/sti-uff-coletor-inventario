@@ -28,23 +28,55 @@ class AppDrawer extends StatelessWidget {
             decoration: const BoxDecoration(
               color: Colors.white,
             ),
-            child: Row(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SvgPicture.asset(
-                    'assets/icons/RenderColetorUFF.svg',
-                    width: 42,
-                    height: 42,
-                  ),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/RenderColetorUFF.svg',
+                        width: 42,
+                        height: 42,
+                      ),
+                    ),
+                    const Text(
+                      'Coletor Inventário',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 41, 41, 41),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                const Text(
-                  'Coletor Inventário',
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 41, 41, 41),
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      label: const Text('Sair'),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
+                      ),
+                      icon: const Icon(Icons.logout),
+                      onPressed: () async {
+                        bool? shouldLogout =
+                            await _showLogoutConfirmationDialog(context);
+
+                        if (shouldLogout == true) {
+                          await authController.signOut();
+                          Navigator.pushReplacementNamed(context, '/login');
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -61,30 +93,12 @@ class AppDrawer extends StatelessWidget {
             title: 'Configurações',
             index: 1,
           ),
-          _buildListTile(
-            context,
-            icon: Icons.info,
-            title: 'Sobre',
-            index: 2,
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.logout,
-              color: AppColors.shadowColor,
-            ),
-            title: const Text(
-              'Sair',
-              style: TextStyle(color: AppColors.shadowColor),
-            ),
-            onTap: () async {
-              bool? shouldLogout = await _showLogoutConfirmationDialog(context);
-
-              if (shouldLogout == true) {
-                await authController.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              }
-            },
-          ),
+          // _buildListTile(
+          //   context,
+          //   icon: Icons.info,
+          //   title: 'Sobre',
+          //   index: 2,
+          // ),
         ],
       ),
     );
@@ -93,7 +107,6 @@ class AppDrawer extends StatelessWidget {
   Future<bool?> _showLogoutConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
         return ConfirmationDialog(
           onCancel: () {

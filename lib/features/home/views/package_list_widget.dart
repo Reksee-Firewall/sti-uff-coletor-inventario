@@ -18,6 +18,7 @@ class PackageListWidget extends StatefulWidget {
 
 class _PackageListWidgetState extends State<PackageListWidget> {
   String _searchQuery = '';
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -243,14 +244,36 @@ class _PackageListWidgetState extends State<PackageListWidget> {
         return Consumer<TagFilterController>(
           builder: (context, tagFilterController, child) {
             return AlertDialog(
-              title: const Text("Filtrar por Tags"),
+              title: const Center(
+                child: Text(
+                  'Filtrar por Tags',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              elevation: 4,
+              backgroundColor: Colors.white,
               content: SingleChildScrollView(
                 child: Wrap(
                   spacing: 10.0,
                   runSpacing: 10.0,
                   children: allTags.where((tag) => tag.isNotEmpty).map((tag) {
                     return FilterChip(
-                      label: Text(tag),
+                      backgroundColor: Colors.white,
+                      selectedColor: const Color.fromARGB(255, 92, 181, 255),
+                      label: Text(
+                        tag,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
                       selected: tagFilterController.isTagSelected(tag),
                       onSelected: (isSelected) {
                         tagFilterController.toggleTag(tag);
@@ -261,10 +284,13 @@ class _PackageListWidgetState extends State<PackageListWidget> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("Fechar"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancelar',
+                  ),
                 ),
               ],
             );
@@ -278,6 +304,8 @@ class _PackageListWidgetState extends State<PackageListWidget> {
   Widget build(BuildContext context) {
     return Consumer2<InventoryProvider, TagFilterController>(
       builder: (context, inventoryProvider, tagFilterController, child) {
+        final provider = Provider.of<InventoryProvider>(context, listen: false);
+
         final packages = inventoryProvider.sentPackages;
         final packagesItemsMap = inventoryProvider.packagesItemsMap;
 
@@ -306,17 +334,60 @@ class _PackageListWidgetState extends State<PackageListWidget> {
 
         return Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 16, left: 16.0, bottom: 16.0),
+            Padding(
+              padding: const EdgeInsets.only(top: 16, left: 16.0, bottom: 16.0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  'Pacotes Enviados',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.shadowColor,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Pacotes Enviados',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.shadowColor,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue,
+                        ),
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 20,
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 2.0),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              )
+                            : const Icon(Icons.replay_sharp),
+                        label: const Text('Recarregar Aba'),
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                try {
+                                  await provider.updatePackagesItemsMap();
+                                } finally {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                }
+                              },
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),

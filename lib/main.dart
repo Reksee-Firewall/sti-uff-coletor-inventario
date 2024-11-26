@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.scaffoldBackgroundColor,
         splashColor: AppColors.lightOrangeSplashColor,
       ),
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: true,
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),

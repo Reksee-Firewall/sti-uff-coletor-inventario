@@ -11,47 +11,52 @@ class InfoCarousel extends StatefulWidget {
 class InfoCarouselState extends State<InfoCarousel> {
   int _currentIndex = 0;
 
+  final List<String> _imagePaths = [
+    'assets/images/camera_panel.jpg',
+    'assets/images/home_panel.jpg',
+    'assets/images/configurations_panel.jpg',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
           color: Colors.blue,
-          height: 200,
+          width: double.infinity,
+          height: 400,
           child: CarouselSlider(
             options: CarouselOptions(
               autoPlayInterval: const Duration(seconds: 3),
               autoPlay: true,
               enlargeCenterPage: true,
-              aspectRatio: 2.0,
-              viewportFraction: 0.8,
+              aspectRatio: 3 / 4,
+              viewportFraction: 0.95,
               onPageChanged: (index, reason) {
                 setState(() {
                   _currentIndex = index;
                 });
               },
             ),
-            items: [
-              _buildCarouselItem('Imagem 1', Colors.lightBlueAccent),
-              _buildCarouselItem('Imagem 2', Colors.indigo),
-              _buildCarouselItem('Imagem 3', Colors.purpleAccent),
-            ],
+            items: _imagePaths
+                .map((imagePath) => _buildCarouselItem(imagePath))
+                .toList(),
           ),
         ),
         const SizedBox(height: 15),
-        _buildPageIndicators(3),
+        _buildPageIndicators(_imagePaths.length),
       ],
     );
   }
 
-  Widget _buildCarouselItem(String text, Color color) {
-    return Container(
-      color: color,
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 24, color: Colors.white),
-        ),
+  Widget _buildCarouselItem(String imagePath) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12.0),
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
       ),
     );
   }
