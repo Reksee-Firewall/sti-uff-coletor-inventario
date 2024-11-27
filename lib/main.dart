@@ -1,4 +1,5 @@
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -19,6 +20,8 @@ void main() async {
   await FirebaseAppCheck.instance.activate();
   await initializeDateFormatting('pt_BR', null);
 
+  User? user = FirebaseAuth.instance.currentUser;
+
   runApp(
     MultiProvider(
       providers: [
@@ -26,13 +29,15 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TagFilterController()),
         ChangeNotifierProvider(create: (_) => PdfReportController()),
       ],
-      child: const MyApp(),
+      child: MyApp(user: user),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final User? user;
+
+  const MyApp({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +53,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.scaffoldBackgroundColor,
         splashColor: AppColors.lightOrangeSplashColor,
       ),
-      debugShowCheckedModeBanner: true,
-      initialRoute: '/login',
+      debugShowCheckedModeBanner: false,
+      initialRoute: user != null ? '/home' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomePage(),

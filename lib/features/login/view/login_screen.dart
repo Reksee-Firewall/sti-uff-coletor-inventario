@@ -52,14 +52,6 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void debugClaims() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final idTokenResult = await user.getIdTokenResult();
-      debugPrint('Claims do usuário: ${idTokenResult.claims}');
-    }
-  }
-
   Future<void> _loginWithGoogle() async {
     _showLoadingDialog();
     final user = await _authController.signInWithGoogle();
@@ -69,21 +61,23 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     if (user != null) {
-      // IssueFix: Aguarda a propagação dos claims. (Tempo para garantir que as claims foram definidas no backend)
-      await Future.delayed(const Duration(seconds: 2));
-      Navigator.pop(context);
+      // // IssueFix: Aguarda a propagação dos claims. (Tempo para garantir que as claims foram definidas no backend)
+      // await Future.delayed(const Duration(seconds: 2));
 
       // Renovando o token do usuário para garantir que as claims sejam atualizadas
       final idTokenResult = await FirebaseAuth.instance.currentUser!
           .getIdTokenResult(true); // true força a atualização do token
 
-      debugClaims();
+      Navigator.pop(context);
+
+      debugPrint('Claims do usuário: ${idTokenResult.claims}');
 
       final isAllowed = idTokenResult.claims?['allowed'] == true;
 
       if (isAllowed) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
+        _authController.signOut();
         showDialog(
           context: context,
           builder: (context) {
@@ -155,6 +149,17 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> _switchAccount() async {
     await _authController.signOut();
     await _loginWithGoogle();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    //   if (user != null) {
+    //     Navigator.pushReplacementNamed(context, '/home');
+    //   }
+    // });
   }
 
   @override
