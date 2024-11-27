@@ -39,9 +39,4 @@ class AuthController {
     await _auth.signOut();
     await _googleSignIn.signOut();
   }
-
-  Future<void> switchAccount() async {
-    await _googleSignIn.signOut();
-    await signInWithGoogle();
-  }
 }

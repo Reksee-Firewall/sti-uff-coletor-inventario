@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:stiuffcoletorinventario/features/login/controller/auth_controller.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -50,18 +52,109 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void debugClaims() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final idTokenResult = await user.getIdTokenResult();
+      debugPrint('Claims do usuário: ${idTokenResult.claims}');
+    }
+  }
+
   Future<void> _loginWithGoogle() async {
     _showLoadingDialog();
     final user = await _authController.signInWithGoogle();
-    Navigator.pop(context);
+
+    if (user == null) {
+      Navigator.pop(context);
+    }
 
     if (user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
+      // IssueFix: Aguarda a propagação dos claims. (Tempo para garantir que as claims foram definidas no backend)
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pop(context);
+
+      // Renovando o token do usuário para garantir que as claims sejam atualizadas
+      final idTokenResult = await FirebaseAuth.instance.currentUser!
+          .getIdTokenResult(true); // true força a atualização do token
+
+      debugClaims();
+
+      final isAllowed = idTokenResult.claims?['allowed'] == true;
+
+      if (isAllowed) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+                  SizedBox(width: 8),
+                  Text(
+                    'Acesso negado!',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              content: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  children: [
+                    const TextSpan(
+                      text: 'Foi feita uma tentativa de login com ',
+                    ),
+                    TextSpan(
+                      text: '"${user.email}"',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(
+                      text: '. No entanto, apenas os emails de domínio ',
+                    ),
+                    const TextSpan(
+                      text: '"id.uff.br"',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(
+                      text: ' são autorizados a utilizar esta aplicação.',
+                    ),
+                  ],
+                ),
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.redAccent,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Entendido'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
   Future<void> _switchAccount() async {
-    await _authController.switchAccount();
+    await _authController.signOut();
+    await _loginWithGoogle();
   }
 
   @override
