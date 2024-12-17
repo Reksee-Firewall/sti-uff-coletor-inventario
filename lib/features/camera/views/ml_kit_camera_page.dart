@@ -26,7 +26,6 @@ class _CameraPageState extends State<CameraPage> {
   double _buttonBottomPosition = 0;
   double _buttonOpacity = 0.0;
 
-  // Variável para controlar o acesso ao formulário
   bool _isInFormPage = false;
 
   @override
@@ -196,7 +195,7 @@ class _CameraPageState extends State<CameraPage> {
                       onTap: () {
                         if (_scannedCode != null) {
                           setState(() {
-                            _isInFormPage = true; // Desativa o scanner
+                            _isInFormPage = true;
                           });
                           Navigator.of(context)
                               .push(CustomPageRoute(
@@ -205,8 +204,7 @@ class _CameraPageState extends State<CameraPage> {
                           )))
                               .then((_) {
                             setState(() {
-                              _isInFormPage =
-                                  false; // Reativa o scanner ao voltar
+                              _isInFormPage = false;
                             });
                           });
                         }
@@ -220,13 +218,6 @@ class _CameraPageState extends State<CameraPage> {
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(10),
-                          // boxShadow: [
-                          //   BoxShadow(
-                          //     color: Colors.black.withOpacity(0.2),
-                          //     blurRadius: 10,
-                          //     offset: const Offset(0, 5),
-                          //   ),
-                          // ],
                         ),
                         child: Center(
                           child: Text(

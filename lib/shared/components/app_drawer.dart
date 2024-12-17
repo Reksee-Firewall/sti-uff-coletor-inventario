@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stiuffcoletorinventario/features/about/views/about_page.dart';
-import 'package:stiuffcoletorinventario/features/camera/views/camera_page.dart';
 import 'package:stiuffcoletorinventario/features/login/controller/auth_controller.dart';
 import 'package:stiuffcoletorinventario/shared/components/confirmation_dialog.dart';
 import 'package:stiuffcoletorinventario/shared/utils/app_colors.dart';
@@ -170,8 +169,6 @@ class AppDrawer extends StatelessWidget {
         return const SettingsPage();
       case '/about':
         return const AboutPage();
-      case '/camera':
-        return const CameraPage();
       default:
         return const HomePage();
     }

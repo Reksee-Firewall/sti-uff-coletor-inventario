@@ -6,7 +6,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:stiuffcoletorinventario/core/providers/inventory_provider.dart';
 import 'package:stiuffcoletorinventario/features/about/views/about_page.dart';
-import 'package:stiuffcoletorinventario/features/camera/views/camera_page.dart';
 import 'package:stiuffcoletorinventario/features/home/controllers/tag_filter_controller.dart';
 import 'package:stiuffcoletorinventario/features/login/view/login_screen.dart';
 import 'package:stiuffcoletorinventario/features/settings/controllers/pdf_report_controller.dart';
@@ -60,7 +59,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/settings': (context) => const SettingsPage(),
         '/about': (context) => const AboutPage(),
-        '/camera': (context) => const CameraPage(),
       },
     );
   }
