@@ -43,6 +43,7 @@ class _CameraPageState extends State<CameraPage> {
       _cameraController = CameraController(
         camera,
         ResolutionPreset.high,
+        enableAudio: false,
       );
 
       await _cameraController!.initialize();

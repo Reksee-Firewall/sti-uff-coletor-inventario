@@ -36,7 +36,7 @@ class AppDrawer extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: SvgPicture.asset(
-                        'assets/icons/RenderColetorUFF.svg',
+                        'assets/icons/RenderAppLogo.svg',
                         width: 42,
                         height: 42,
                       ),

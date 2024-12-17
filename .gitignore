@@ -74,3 +74,5 @@ functions/
 
 # Others
 pubspec.lock
+upload_keystore.jks
+android/app/build.gradle

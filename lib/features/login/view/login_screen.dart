@@ -172,7 +172,7 @@ class LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
-              'assets/icons/RenderColetorUFF.svg',
+              'assets/icons/RenderAppLogo.svg',
               width: 100,
               height: 100,
             ),

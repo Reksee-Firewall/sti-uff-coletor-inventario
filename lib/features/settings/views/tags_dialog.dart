@@ -75,6 +75,7 @@ class TagsDialogState extends State<TagsDialog> {
                           selected
                               ? selectedTagsTemp.add(tag)
                               : selectedTagsTemp.remove(tag);
+                          widget.onTagsSelected(selectedTagsTemp);
                         });
                       },
                     );
@@ -112,7 +113,18 @@ class TagsDialogState extends State<TagsDialog> {
                   onSubmitted: (value) {
                     if (value.isNotEmpty) {
                       setState(() {
-                        widget.allTags.add(value);
+                        if (!widget.allTags.contains(value)) {
+                          widget.allTags.add(value);
+                          selectedTagsTemp.add(value);
+                          widget.onTagsSelected(selectedTagsTemp);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Não foi possível criar a tag. Já existe uma tag com o mesmo nome.'),
+                            ),
+                          );
+                        }
                       });
                     }
                   },
@@ -132,27 +144,27 @@ class TagsDialogState extends State<TagsDialog> {
             'Cancelar',
           ),
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {
-            widget.onTagsSelected(selectedTagsTemp);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("As alterações em tags foram salvas.")),
-            );
-          },
-          child: const Text(
-            'Aplicar',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
+        // ElevatedButton(
+        //   style: ElevatedButton.styleFrom(
+        //     backgroundColor: Colors.blue,
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //   ),
+        //   onPressed: () {
+        //     widget.onTagsSelected(selectedTagsTemp);
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(
+        //           content: Text("As alterações em tags foram salvas.")),
+        //     );
+        //   },
+        //   child: const Text(
+        //     'Aplicar',
+        //     style: TextStyle(
+        //       color: Colors.white,
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
